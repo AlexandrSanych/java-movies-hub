@@ -64,17 +64,14 @@ public class MoviesHandler extends BaseHttpHandler {
                 } else {
                     handleGetMovieById(exchange, path);
                 }
-            }
-            // Обработка POST /movies
-            else if ("POST".equals(method) && path.equals("/movies")) {
+            } else if ("POST".equals(method) && path.equals("/movies")) {
+                // Обработка POST /movies
                 handlePostMovie(exchange);
-            }
-            // Обработка DELETE /movies/{id}
-            else if ("DELETE".equals(method) && path.matches("/movies/\\d+")) {
+            } else if ("DELETE".equals(method) && path.matches("/movies/\\d+")) {
+                // Обработка DELETE /movies/{id}
                 handleDeleteMovie(exchange, path);
-            }
-            // Неподдерживаемый метод или путь
-            else {
+            } else {
+                // Неподдерживаемый метод или путь
                 ErrorResponse error = new ErrorResponse("Метод не поддерживается", 405);
                 exchange.getResponseHeaders().set("Allow", "GET, POST, DELETE");
                 sendJson(exchange, 405, error.toJson());
@@ -86,7 +83,6 @@ public class MoviesHandler extends BaseHttpHandler {
             sendJson(exchange, 500, error.toJson());
         }
     }
-
     // ========== Основные методы обработки запросов ==========
 
     //GET /movies - получение всех фильмов
