@@ -83,9 +83,9 @@ public class MoviesHandler extends BaseHttpHandler {
         // GET /movies
         if (parts.length == 2) {
             handleGetAllMovies(exchange);
-        }
-        // GET /movies/{id}
-        else if (parts.length == 3) {
+
+            // GET /movies/{id}
+        } else if (parts.length == 3) {
             try {
                 int id = Integer.parseInt(parts[2]);
                 handleGetMovieById(exchange, id);
