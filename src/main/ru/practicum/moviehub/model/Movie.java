@@ -3,9 +3,8 @@ package ru.practicum.moviehub.model;
 import java.time.LocalDate;
 import java.util.Objects;
 
-/**
- * Модель фильма
- */
+//Модель фильма
+
 public class Movie {
     private final int id;            // Уникальный идентификатор
     private final String name;       // Название фильма
@@ -13,9 +12,8 @@ public class Movie {
     private final LocalDate releaseDate; // Дата выпуска
     private final int duration;      // Продолжительность в минутах
 
-    /**
-     * Конструктор фильма
-     */
+    //Конструктор фильма
+
     public Movie(int id, String name, String description, LocalDate releaseDate, int duration) {
         this.id = id;
         this.name = name;

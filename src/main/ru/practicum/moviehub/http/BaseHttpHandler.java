@@ -7,9 +7,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 
-/**
- * Базовый обработчик HTTP запросов
- */
+//Базовый обработчик HTTP запросов
+
 public abstract class BaseHttpHandler implements HttpHandler {
     protected static final String CONTENT_TYPE_JSON = "application/json; charset=UTF-8";
 
@@ -32,9 +31,8 @@ public abstract class BaseHttpHandler implements HttpHandler {
         }
     }
 
-    /**
-     * Отправляет ответ без содержимого (204 No Content)
-     */
+    //Отправляет ответ без содержимого (204 No Content)
+
     protected void sendNoContent(HttpExchange exchange) throws IOException {
         exchange.sendResponseHeaders(204, -1);
         exchange.close();

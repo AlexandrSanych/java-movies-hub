@@ -2,9 +2,8 @@ package ru.practicum.moviehub.model;
 
 import com.google.gson.annotations.SerializedName;
 
-/**
- * DTO для создания фильма (принимается от клиента)
- */
+//DTO для создания фильма (принимается от клиента)
+
 public class MovieCreateRequest {
     private String name;         // Название фильма
     private String description;  // Описание фильма

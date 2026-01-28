@@ -16,11 +16,11 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -473,11 +473,16 @@ class MoviesApiTest {
         int threadCount = 5;
         ExecutorService executor = Executors.newFixedThreadPool(threadCount);
         Set<Integer> ids = new HashSet<>();
+        List<Exception> exceptions = Collections.synchronizedList(new ArrayList<>());
 
         for (int i = 0; i < threadCount; i++) {
             final int index = i;
             executor.submit(() -> {
-                try {
+                // Создаем отдельный HttpClient для каждого потока
+                try (HttpClient threadClient = HttpClient.newBuilder()
+                        .connectTimeout(Duration.ofSeconds(10))
+                        .build()) {
+
                     String movieJson = createMovieJson("Параллельный " + index,
                             "Поток " + index, "2023-01-01", 100 + index);
 
@@ -487,7 +492,7 @@ class MoviesApiTest {
                             .POST(HttpRequest.BodyPublishers.ofString(movieJson))
                             .build();
 
-                    HttpResponse<String> resp = client.send(req,
+                    HttpResponse<String> resp = threadClient.send(req,
                             HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
 
                     if (resp.statusCode() == 201) {
@@ -495,9 +500,11 @@ class MoviesApiTest {
                         synchronized (ids) {
                             ids.add(movie.getId());
                         }
+                    } else {
+                        exceptions.add(new RuntimeException("Неожиданный статус: " + resp.statusCode()));
                     }
                 } catch (Exception e) {
-                    // Игнорируем исключения для целей теста
+                    exceptions.add(e);
                 }
             });
         }
@@ -506,9 +513,16 @@ class MoviesApiTest {
         boolean terminated = executor.awaitTermination(10, TimeUnit.SECONDS);
         assertTrue(terminated, "Все потоки должны завершиться за 10 секунд");
 
+        // Проверяем, что не было исключений
+        assertTrue(exceptions.isEmpty(),
+                "Не должно быть исключений в параллельных запросах: " +
+                        exceptions.stream()
+                                .map(e -> e.getClass().getSimpleName() + ": " + e.getMessage())
+                                .collect(Collectors.joining(", ")));
+
         // Проверяем результаты
         assertEquals(threadCount, ids.size(),
-                "Все " + threadCount + " параллельных запросов должны создать уникальные ID");
+                "Все " + threadCount + " параллельных запросов должны создать уникальные ID. Создано: " + ids);
 
         // Проверяем общее количество фильмов
         HttpRequest getReq = HttpRequest.newBuilder()
@@ -521,7 +535,7 @@ class MoviesApiTest {
 
         Movie[] allMovies = gson.fromJson(getResp.body(), Movie[].class);
         assertEquals(threadCount, allMovies.length,
-                "Должно быть " + threadCount + " фильмов");
+                "Должно быть " + threadCount + " фильмов. Найдено: " + allMovies.length);
     }
 
     @Test

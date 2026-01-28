@@ -17,10 +17,8 @@ import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.logging.Logger;
 
-/**
- * Обработчик HTTP запросов для работы с фильмами
- * Реализует REST API для CRUD операций с фильмами
- */
+//Обработчик HTTP запросов для работы с фильмами
+
 public class MoviesHandler extends BaseHttpHandler {
     private static final Logger logger = Logger.getLogger(MoviesHandler.class.getName());
     private static final int MAX_REQUEST_SIZE = 1024 * 1024; // 1 МБ
@@ -42,9 +40,7 @@ public class MoviesHandler extends BaseHttpHandler {
                 .create();
     }
 
-    /**
-     * Основной метод обработки HTTP запросов
-     */
+    //Основной метод обработки HTTP запросов
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         try {
@@ -79,9 +75,8 @@ public class MoviesHandler extends BaseHttpHandler {
         }
     }
 
-    /**
-     * Обработка GET запросов
-     */
+    //Обработка GET запросов
+
     private void handleGetRequest(HttpExchange exchange, String path) throws IOException {
         String[] parts = path.split("/");
 
@@ -104,9 +99,8 @@ public class MoviesHandler extends BaseHttpHandler {
         }
     }
 
-    /**
-     * Обработка DELETE запросов
-     */
+    //Обработка DELETE запросов
+
     private void handleDeleteRequest(HttpExchange exchange, String path) throws IOException {
         String[] parts = path.split("/");
 
@@ -124,10 +118,7 @@ public class MoviesHandler extends BaseHttpHandler {
         }
     }
 
-    /**
-     * GET /movies - получение всех фильмов
-     * GET /movies?year=YYYY - фильтрация по году
-     */
+    //GET /movies - получение всех фильмов
     private void handleGetAllMovies(HttpExchange exchange) throws IOException {
         try {
             // Проверяем query параметры
@@ -178,9 +169,8 @@ public class MoviesHandler extends BaseHttpHandler {
         }
     }
 
-    /**
-     * GET /movies/{id} - получение фильма по ID
-     */
+    //GET /movies/{id} - получение фильма по ID
+
     private void handleGetMovieById(HttpExchange exchange, int id) throws IOException {
         try {
             Optional<Movie> movieOpt = moviesStore.getMovieById(id);
@@ -199,12 +189,8 @@ public class MoviesHandler extends BaseHttpHandler {
         }
     }
 
-    /**
-     * POST /movies - добавление нового фильма
-     */
-    /**
-     * POST /movies - добавление нового фильма
-     */
+    //POST /movies - добавление нового фильма
+
     private void handlePostMovie(HttpExchange exchange) throws IOException {
         // Проверяем Content-Type
         String contentType = exchange.getRequestHeaders().getFirst("Content-Type");
@@ -311,9 +297,8 @@ public class MoviesHandler extends BaseHttpHandler {
         }
     }
 
-    /**
-     * DELETE /movies/{id} - удаление фильма
-     */
+    //DELETE /movies/{id} - удаление фильма
+
     private void handleDeleteMovie(HttpExchange exchange, int id) throws IOException {
         try {
             // Проверяем, существует ли фильм
@@ -338,9 +323,8 @@ public class MoviesHandler extends BaseHttpHandler {
         }
     }
 
-    /**
-     * Валидирует данные для создания фильма
-     */
+    //Валидирует данные для создания фильма
+
     private List<String> validateMovieRequest(MovieCreateRequest request) {
         List<String> errors = new ArrayList<>();
 
@@ -403,9 +387,8 @@ public class MoviesHandler extends BaseHttpHandler {
         return errors;
     }
 
-    /**
-     * Отправляет ошибку 405 Method Not Allowed
-     */
+    //Отправляет ошибку 405 Method Not Allowed
+
     private void sendMethodNotAllowed(HttpExchange exchange, String[] allowedMethods) throws IOException {
         String allowed = String.join(", ", allowedMethods);
         exchange.getResponseHeaders().set("Allow", allowed);
