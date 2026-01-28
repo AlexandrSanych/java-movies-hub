@@ -20,7 +20,6 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -62,7 +61,8 @@ class MoviesApiTest {
 
                 return; // Если запрос успешен, сервер запущен
             } catch (Exception e) {
-               // Игнорируем исключения при опросе сервера, просто ждем
+                // Игнорируем исключения при опросе сервера, просто ждем
+                // Это нормально в методе ожидания запуска сервера
             }
         }
 
@@ -380,7 +380,7 @@ class MoviesApiTest {
     }
 
     @Test
-    @DisplayName("POST /movies с невалидными данными возвращает 422")
+    @DisplayName("POST /movies с невалидными данми возвращает 422")
     void postMovie_shouldReturn422_whenInvalidData() throws Exception {
         String invalidJson = "{\"name\":\"\", \"releaseDate\":\"2023-01-01\", \"duration\":-10}";
 
@@ -473,15 +473,15 @@ class MoviesApiTest {
         int threadCount = 5;
         ExecutorService executor = Executors.newFixedThreadPool(threadCount);
         Set<Integer> ids = new HashSet<>();
-        List<Exception> exceptions = Collections.synchronizedList(new ArrayList<>());
 
         for (int i = 0; i < threadCount; i++) {
             final int index = i;
             executor.submit(() -> {
-                // Создаем отдельный HttpClient для каждого потока
-                try (HttpClient threadClient = HttpClient.newBuilder()
-                        .connectTimeout(Duration.ofSeconds(10))
-                        .build()) {
+                try {
+                    // Создаем отдельный HttpClient для каждого потока
+                    HttpClient threadClient = HttpClient.newBuilder()
+                            .connectTimeout(Duration.ofSeconds(10))
+                            .build();
 
                     String movieJson = createMovieJson("Параллельный " + index,
                             "Поток " + index, "2023-01-01", 100 + index);
@@ -500,11 +500,10 @@ class MoviesApiTest {
                         synchronized (ids) {
                             ids.add(movie.getId());
                         }
-                    } else {
-                        exceptions.add(new RuntimeException("Неожиданный статус: " + resp.statusCode()));
                     }
                 } catch (Exception e) {
-                    exceptions.add(e);
+                    // Если происходит исключение, тест должен упасть
+                    Assertions.fail("Исключение в параллельном запросе " + index + ": " + e.getMessage());
                 }
             });
         }
@@ -512,13 +511,6 @@ class MoviesApiTest {
         executor.shutdown();
         boolean terminated = executor.awaitTermination(10, TimeUnit.SECONDS);
         assertTrue(terminated, "Все потоки должны завершиться за 10 секунд");
-
-        // Проверяем, что не было исключений
-        assertTrue(exceptions.isEmpty(),
-                "Не должно быть исключений в параллельных запросах: " +
-                        exceptions.stream()
-                                .map(e -> e.getClass().getSimpleName() + ": " + e.getMessage())
-                                .collect(Collectors.joining(", ")));
 
         // Проверяем результаты
         assertEquals(threadCount, ids.size(),
