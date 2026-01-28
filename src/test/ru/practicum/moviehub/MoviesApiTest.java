@@ -537,7 +537,6 @@ class MoviesApiTest {
         assertEquals(threadCount, allMovies.length,
                 "Должно быть " + threadCount + " фильмов. Найдено: " + allMovies.length);
     }
-
     @Test
     @DisplayName("POST /movies с очень длинным названием")
     void postMovie_shouldHandleLongName_whenNameIs100Characters() throws Exception {
